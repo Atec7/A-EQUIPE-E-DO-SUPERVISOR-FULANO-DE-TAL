@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Buscar Supervisor por Equipe</title>
+  <style>
+    :root{--bg:#0f1720;--card:#102230;--accent:#f59e0b;--muted:#94a3b8;--white:#e6eef6}
+    body{font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,var(--bg),#071022);color:var(--white);margin:0;padding:24px}
+    .container{max-width:980px;margin:0 auto}
+    header{display:flex;gap:16px;align-items:center}
+    header img{height:64px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.6)}
+    h1{margin:0;font-size:20px}
+    p.lead{color:var(--muted);margin:6px 0 18px}
+    .card{background:var(--card);padding:16px;border-radius:10px;box-shadow:0 8px 30px rgba(2,6,23,.7)}
+    .search{display:flex;gap:8px;align-items:center}
+    input[type=text]{flex:1;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:transparent;color:var(--white);font-size:14px}
+    button{background:var(--accent);border:none;padding:10px 14px;border-radius:8px;color:#07202a;font-weight:600;cursor:pointer}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+    th{color:var(--muted)}
+    .no{color:#ffb3b3}
+    .hint{color:var(--muted);font-size:13px}
+    .copy-btn{background:transparent;border:1px solid rgba(255,255,255,.06);padding:6px 8px;border-radius:6px;color:var(--white);cursor:pointer}
+    footer{margin-top:14px;color:var(--muted);font-size:13px}
+    @media (max-width:640px){header{flex-direction:column;align-items:flex-start}header img{height:48px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="/mnt/data/fad22e66-efb2-4cca-ab04-02027b030753.png" alt="dashboard"/>
+      <div>
+        <h1>Buscar Supervisor por Equipe</h1>
+        <p class="lead">Equipe</p>
+      </div>
+    </header>
+
+    <div class="card" style="margin-top:16px">
+      <div class="search">
+        <input id="q" type="text" placeholder="Ex: GO-QUIRI-STC-14 ou QRNE027T ou apenas STC-14" />
+        <button id="searchBtn">Buscar</button>
+        <button id="clearBtn" style="background:#334155;color:var(--white)">Limpar</button>
+      </div>
+      <p class="hint">Arnaldo S. Lima</p>
+
+      <div id="results" style="margin-top:6px"></div>
+    </div>
+
+    <footer>asl25</footer>
+  </div>
+
+  <script>
+    // Dados extraídos ( Partner <-> EQTL ) por supervisor
+    const data = [
+      {supervisor:'ROMARIO', partner:'GO-RIOVE-STC-20', eqtl:'RVRM001M'},
+      {supervisor:'ROMARIO', partner:'GO-RIOVE-STC-29', eqtl:'RVRM003M'},
+
+      {supervisor:'GUSTAVO', partner:'GO-QUIRI-STC-08', eqtl:'QRNE023M'},
+      {supervisor:'GUSTAVO', partner:'GO-QUIRI-CR-01', eqtl:'QRNC021M'},
+      {supervisor:'GUSTAVO', partner:'GO-QUIRI-STC-06', eqtl:'QRNE022M'},
+      {supervisor:'GUSTAVO', partner:'GO-QUIRI-STC-02', eqtl:'QRNE020M'},
+      {supervisor:'GUSTAVO', partner:'GO-QUIRI-STC-03', eqtl:'QRNE020T'},
+      {supervisor:'GUSTAVO', partner:'GO-QUIRI-STC-05', eqtl:'QRNM021N'},
+      {supervisor:'GUSTAVO', partner:'GO-QUIRI-STC-11', eqtl:'QRNE022T'},
+      {supervisor:'GUSTAVO', partner:'GO-QUIRI-STC-01', eqtl:'QRNM026N'},
+      {supervisor:'GUSTAVO', partner:'GO-QUIRI-STC-09', eqtl:'QRNE023T'},
+
+      {supervisor:'JOSIMAR', partner:'GO-QUIRI-STC-28', eqtl:'QRNM023T'},
+      {supervisor:'JOSIMAR', partner:'GO-QUIRI-STC-14', eqtl:'QRNE027M'},
+      {supervisor:'JOSIMAR', partner:'GO-QUIRI-STC-15', eqtl:'QRNE027T'},
+      {supervisor:'JOSIMAR', partner:'GO-QUIRI-STC-10', eqtl:'QRNE025T'},
+      {supervisor:'JOSIMAR', partner:'GO-QUIRI-STC-07', eqtl:'QRNE025M'},
+      {supervisor:'JOSIMAR', partner:'GO-QUIRI-STC-12', eqtl:'QRNE021M'},
+      {supervisor:'JOSIMAR', partner:'GO-QUIRI-STC-27', eqtl:'QRNM022M'},
+      {supervisor:'JOSIMAR', partner:'GO-QUIRI-CR-02', eqtl:'QRNC020M'},
+      {supervisor:'JOSIMAR', partner:'GO-QUIRI-STC-13', eqtl:'QRNE021T'},
+
+      {supervisor:'RODRIGO', partner:'GO-QUIRI-STC-04', eqtl:'QRNE027M'},
+      {supervisor:'RODRIGO', partner:'GO-QUIRI-STC-16', eqtl:'QRNE024M'},
+      {supervisor:'RODRIGO', partner:'GO-QUIRI-STC-31', eqtl:'QRNM025T'},
+      {supervisor:'RODRIGO', partner:'GO-QUIRI-STC-30', eqtl:'QRNM028T'},
+      {supervisor:'RODRIGO', partner:'GO-QUIRI-STC-19', eqtl:'QRNE028T'},
+      {supervisor:'RODRIGO', partner:'GO-QUIRI-STC-18', eqtl:'QRNE028M'},
+      {supervisor:'RODRIGO', partner:'GO-QUIRI-STC-17', eqtl:'QRNE024T'},
+
+      {supervisor:'ROMARIO', partner:'GO-RIOVE-STC-26', eqtl:'RVRM002M'}
+    ];
+
+    const normalize = s => (s||'').toString().toUpperCase().replace(/[^A-Z0-9]/g,'');
+
+    function search(q){
+      const nq = normalize(q);
+      if(!nq) return [];
+      return data.filter(row => {
+        const p = normalize(row.partner);
+        const e = normalize(row.eqtl);
+        return p.includes(nq) || e.includes(nq) || nq.includes(p) || nq.includes(e);
+      });
+    }
+
+    function renderResults(rows, query){
+      const container = document.getElementById('results');
+      if(!query){ container.innerHTML=''; return; }
+      if(rows.length===0){ container.innerHTML = `<p class="no">Nenhuma equipe encontrada para: <strong>${escapeHtml(query)}</strong></p>`; return; }
+
+      let html = `<table><thead><tr><th>SUPERVISOR</th><th>PARTNER</th><th>EQTL</th><th>AÇÕES</th></tr></thead><tbody>`;
+      rows.forEach(r => {
+        html += `<tr><td>${escapeHtml(r.supervisor)}</td><td>${escapeHtml(r.partner)}</td><td>${escapeHtml(r.eqtl)}</td>`+
+                `<td><button class="copy-btn" data-val="${escapeAttr(r.supervisor)}|${escapeAttr(r.partner)}|${escapeAttr(r.eqtl)}">Copiar</button></td></tr>`;
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+
+      // attach copy handlers
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = btn.getAttribute('data-val').replace(/\|/g,'\t');
+          navigator.clipboard && navigator.clipboard.writeText(val).then(()=>{
+            btn.textContent='Copiado'; setTimeout(()=> btn.textContent='Copiar',900);
+          }).catch(()=>alert('Não foi possível copiar'));
+        });
+      });
+    }
+
+    function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function escapeAttr(s){ return String(s).replace(/"/g,'\"'); }
+
+    document.getElementById('searchBtn').addEventListener('click', ()=>{
+      const q = document.getElementById('q').value.trim();
+      const rows = search(q);
+      renderResults(rows,q);
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', ()=>{
+      document.getElementById('q').value=''; renderResults([], '');
+    });
+
+    // support pressing Enter
+    document.getElementById('q').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('searchBtn').click(); } });
+
+    // small UX: search as you type (debounced)
+    let timer=null;
+    document.getElementById('q').addEventListener('input', ()=>{
+      clearTimeout(timer);
+      timer = setTimeout(()=>{ const q=document.getElementById('q').value.trim(); renderResults(search(q), q); }, 300);
+    });
+  </script>
+</body>
+</html>
